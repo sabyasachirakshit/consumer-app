@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from "./ThemeContext";
-import { Select, Modal, Form, Input, Button, Progress } from 'antd';
+import { Select, Modal, Form, Input, Button, Table, DatePicker } from 'antd';
 import DarkModeToggle from './DarkModeToggle';
 
 const { Option } = Select;
@@ -12,6 +12,7 @@ const DashboardPage = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('active');
   const [showFormModal, setShowFormModal] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]); // State to store selected products
+  const [formSubmissions, setFormSubmissions] = useState([]); // State to store form submissions
   const [form] = Form.useForm();
 
   const handleTabClick = (tab) => {
@@ -30,7 +31,23 @@ const DashboardPage = ({ onLogout }) => {
   const handleFormSubmit = () => {
     form.validateFields()
       .then(values => {
-        console.log('Form values:', values);
+        // Calculate total price
+        const totalPrice = selectedProducts.reduce((acc, product, index) => {
+          const sellingRate = values.sellingRate[index];
+          const totalItems = values.totalItems[index];
+          return acc + (sellingRate * totalItems);
+        }, 0);
+        // Add new submission to formSubmissions state
+        setFormSubmissions([
+          ...formSubmissions,
+          {
+            key: formSubmissions.length + 1,
+            userName: 'User', // Static username for demonstration
+            totalPrice,
+            lastModified: new Date().toLocaleString(),
+            formData: values
+          }
+        ]);
         setShowFormModal(false);
       })
       .catch(errorInfo => {
@@ -41,6 +58,56 @@ const DashboardPage = ({ onLogout }) => {
   const handleProductSelectChange = (selectedValues) => {
     setSelectedProducts(selectedValues); // Update selected products
   };
+
+  const columns = [
+    {
+      title: 'Serial Number',
+      dataIndex: 'key',
+      key: 'key',
+    },
+    {
+      title: 'User Name',
+      dataIndex: 'userName',
+      key: 'userName',
+    },
+    {
+      title: 'Total Price',
+      dataIndex: 'totalPrice',
+      key: 'totalPrice',
+      render: (text) => `$${text}`,
+    },
+    {
+      title: 'Last Modified',
+      dataIndex: 'lastModified',
+      key: 'lastModified',
+    },
+    {
+      title: 'Form',
+      dataIndex: 'formData',
+      key: 'formData',
+      render: (formData) => (
+        <Form layout="vertical" initialValues={formData}>
+          {selectedProducts.map((product, index) => (
+            <div key={index} style={{ marginBottom: '10px' }}>
+              <div className="product-info" style={{ display: "flex", justifyContent: "space-between" }}>
+                <p>{index + 1}. {product} </p>
+                <p>Price: $10</p>
+              </div>
+              <Input.Group compact style={{ marginBottom: '5px' }}>
+                <Form.Item label="Selling Rate" name={['sellingRate', index]} noStyle>
+                  <Input style={{ width: '50%' }} placeholder="Selling Rate" />
+                </Form.Item>
+                <Form.Item label="Total Items" name={['totalItems', index]} noStyle>
+                  <Input style={{ width: '50%' }} placeholder="Total Items" />
+                </Form.Item>
+              </Input.Group>
+              <div className="remaining-items" style={{ display: "flex", justifyContent: "center", float: "right", width: "30%", backgroundColor: "lightgreen", color: "darkgreen" }}>2 items remaining</div>
+            </div>
+          ))}
+        </Form>
+      )
+    }
+  ];
 
   return (
     <div className={isDarkMode ? 'dark' : 'light'}>
@@ -55,6 +122,8 @@ const DashboardPage = ({ onLogout }) => {
         {activeTab === 'active' && <h3>Active Sale Orders</h3>}
         {activeTab === 'completed' && <h3>Completed Sale Orders</h3>}
       </div>
+
+      <Table dataSource={formSubmissions} columns={columns} />
 
       <button onClick={handleLogoutClick}>Logout</button>
 
@@ -95,12 +164,10 @@ const DashboardPage = ({ onLogout }) => {
           <Form.Item label="Selected Products">
             {selectedProducts.map((product, index) => (
               <div key={index} style={{ marginBottom: '10px' }}>
-                <div className="product-info" style={{display:"flex",justifyContent:"space-between"}}>
-                <p>{index + 1}. {product} </p>
-                
-                <p>Price: $10</p>
+                <div className="product-info" style={{ display: "flex", justifyContent: "space-between" }}>
+                  <p>{index + 1}. {product} </p>
+                  <p>Price: $10</p>
                 </div>
-                
                 <Input.Group compact style={{ marginBottom: '5px' }}>
                   <Form.Item label="Selling Rate" name={['sellingRate', index]} noStyle>
                     <Input style={{ width: '50%' }} placeholder="Selling Rate" />
@@ -109,8 +176,7 @@ const DashboardPage = ({ onLogout }) => {
                     <Input style={{ width: '50%' }} placeholder="Total Items" />
                   </Form.Item>
                 </Input.Group>
-                
-                <div className="remaining-items" style={{ display:"flex",justifyContent:"center",float:"right",width:"30%",backgroundColor:"lightgreen", color:"darkgreen"}}>2 items remaining</div>
+                <div className="remaining-items" style={{ display: "flex", justifyContent: "center", float: "right", width: "30%", backgroundColor: "lightgreen", color: "darkgreen" }}>2 items remaining</div>
               </div>
             ))}
           </Form.Item>
