@@ -12,8 +12,7 @@ const DashboardPage = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('active');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [sellingRate, setSellingRate] = useState('');
-  const [totalItems, setTotalItems] = useState('');
+  const [formValues, setFormValues] = useState([]); // State to store form values
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -38,10 +37,24 @@ const DashboardPage = ({ onLogout }) => {
 
   const handleProductSelect = (value) => {
     setSelectedProducts(value);
+    // Initialize form values for each selected product
+    setFormValues(value.map(product => ({ product, sellingRate: '', totalItems: '' })));
   };
 
   const handleRemoveProduct = (productId) => {
     setSelectedProducts(selectedProducts.filter(product => product !== productId));
+    // Remove form values for the removed product
+    setFormValues(formValues.filter(formValue => formValue.product !== productId));
+  };
+
+  const handleInputChange = (productId, fieldName, value) => {
+    // Update the selling rate or total items for the corresponding product
+    setFormValues(formValues.map(formValue => {
+      if (formValue.product === productId) {
+        return { ...formValue, [fieldName]: value };
+      }
+      return formValue;
+    }));
   };
 
   return (
@@ -70,7 +83,7 @@ const DashboardPage = ({ onLogout }) => {
           <Option value="product2">Product 2</Option>
           <Option value="product3">Product 3</Option>
         </Select>
-        {selectedProducts.map(product => (
+        {formValues.map(({ product, sellingRate, totalItems }) => (
           <div key={product} className="selected-product">
             <div>
               <span>{product}</span>
@@ -81,12 +94,12 @@ const DashboardPage = ({ onLogout }) => {
               <Input
                 placeholder="Selling Rate"
                 value={sellingRate}
-                onChange={(e) => setSellingRate(e.target.value)}
+                onChange={(e) => handleInputChange(product, 'sellingRate', e.target.value)}
               />
               <Input
                 placeholder="Total Items"
                 value={totalItems}
-                onChange={(e) => setTotalItems(e.target.value)}
+                onChange={(e) => handleInputChange(product, 'totalItems', e.target.value)}
               />
               <div className="items-left">10 items left</div>
             </div>
