@@ -12,6 +12,7 @@ const DashboardPage = ({ onLogout }) => {
   const [activeTab, setActiveTab] = useState('active');
   const [showFormModal, setShowFormModal] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]); // State to store selected products
+  const [editingFormData, setEditingFormData] = useState(null); // State to store the data of the form being edited
   const [formSubmissions, setFormSubmissions] = useState([]); // State to store form submissions
   const [form] = Form.useForm();
 
@@ -25,6 +26,9 @@ const DashboardPage = ({ onLogout }) => {
   };
 
   const handleSaleOrderClick = () => {
+    setEditingFormData(null);
+    setSelectedProducts([]);
+    form.resetFields();
     setShowFormModal(true);
   };
 
@@ -37,17 +41,29 @@ const DashboardPage = ({ onLogout }) => {
           const totalItems = values.totalItems[index];
           return acc + (sellingRate * totalItems);
         }, 0);
-        // Add new submission to formSubmissions state
-        setFormSubmissions([
-          ...formSubmissions,
-          {
-            key: formSubmissions.length + 1,
-            userName: 'User', // Static username for demonstration
-            totalPrice,
-            lastModified: new Date().toLocaleString(),
-            formData: values
-          }
-        ]);
+
+        if (editingFormData) {
+          // Update existing form submission
+          const updatedSubmissions = formSubmissions.map(submission =>
+            submission.key === editingFormData.key
+              ? { ...submission, totalPrice, lastModified: new Date().toLocaleString(), formData: values }
+              : submission
+          );
+          setFormSubmissions(updatedSubmissions);
+        } else {
+          // Add new form submission
+          setFormSubmissions([
+            ...formSubmissions,
+            {
+              key: formSubmissions.length + 1,
+              userName: 'User', // Static username for demonstration
+              totalPrice,
+              lastModified: new Date().toLocaleString(),
+              formData: values
+            }
+          ]);
+        }
+        
         setShowFormModal(false);
       })
       .catch(errorInfo => {
@@ -57,6 +73,13 @@ const DashboardPage = ({ onLogout }) => {
 
   const handleProductSelectChange = (selectedValues) => {
     setSelectedProducts(selectedValues); // Update selected products
+  };
+
+  const handleEditForm = (formData, products) => {
+    setEditingFormData(formData);
+    setSelectedProducts(products);
+    form.setFieldsValue(formData.formData);
+    setShowFormModal(true);
   };
 
   const columns = [
@@ -85,26 +108,8 @@ const DashboardPage = ({ onLogout }) => {
       title: 'Form',
       dataIndex: 'formData',
       key: 'formData',
-      render: (formData) => (
-        <Form layout="vertical" initialValues={formData}>
-          {selectedProducts.map((product, index) => (
-            <div key={index} style={{ marginBottom: '10px' }}>
-              <div className="product-info" style={{ display: "flex", justifyContent: "space-between" }}>
-                <p>{index + 1}. {product} </p>
-                <p>Price: $10</p>
-              </div>
-              <Input.Group compact style={{ marginBottom: '5px' }}>
-                <Form.Item label="Selling Rate" name={['sellingRate', index]} noStyle>
-                  <Input style={{ width: '50%' }} placeholder="Selling Rate" />
-                </Form.Item>
-                <Form.Item label="Total Items" name={['totalItems', index]} noStyle>
-                  <Input style={{ width: '50%' }} placeholder="Total Items" />
-                </Form.Item>
-              </Input.Group>
-              <div className="remaining-items" style={{ display: "flex", justifyContent: "center", float: "right", width: "30%", backgroundColor: "lightgreen", color: "darkgreen" }}>2 items remaining</div>
-            </div>
-          ))}
-        </Form>
+      render: (text, record) => (
+        <Button type="link" onClick={() => handleEditForm(record, selectedProducts)}>..</Button>
       )
     }
   ];
@@ -151,6 +156,7 @@ const DashboardPage = ({ onLogout }) => {
               mode="multiple"
               placeholder="Select products"
               onChange={handleProductSelectChange} // Handle selection change
+              value={selectedProducts}
             >
               {/* Replace this with your actual product options */}
               <Option value="product1">Product 1</Option>
