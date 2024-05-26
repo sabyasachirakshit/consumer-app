@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "./ThemeContext";
+import DarkModeToggle from "./DarkModeToggle";
 
 const fakeAuthApi = (username, password) => {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
-      if (username === 'user' && password === 'password') {
+      if (username === "user" && password === "password") {
         resolve({ success: true });
       } else {
-        reject({ success: false, message: 'Invalid credentials' });
+        reject({ success: false, message: "Invalid credentials" });
       }
     }, 1000); // Simulate network latency with a 1-second delay
   });
 };
 
 const LoginPage = ({ setAuth }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const { isDarkMode } = useTheme();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -28,7 +31,7 @@ const LoginPage = ({ setAuth }) => {
         setLoading(false);
         if (response.success) {
           setAuth(true);
-          navigate('/dashboard');
+          navigate("/dashboard");
         }
       })
       .catch((error) => {
@@ -38,7 +41,8 @@ const LoginPage = ({ setAuth }) => {
   };
 
   return (
-    <div>
+    <div className={isDarkMode ? 'dark' : 'light'}>
+        <DarkModeToggle />
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -60,7 +64,7 @@ const LoginPage = ({ setAuth }) => {
           />
         </div>
         <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>

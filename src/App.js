@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import {
   createBrowserRouter,
   RouterProvider,
-  Redirect,
-  Route,
   Navigate,
 } from "react-router-dom";
 import HomePage from './components/HomePage';
 import LoginPage from './components/LoginPage';
 import DashboardPage from './components/DashboardPage';
+import { ThemeProvider } from './components/ThemeContext';
+import "./styles/dark.css";
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,7 +37,10 @@ const App = () => {
   ]);
 
   return (
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
+    
   );
 };
 
