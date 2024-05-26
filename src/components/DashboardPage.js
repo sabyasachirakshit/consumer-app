@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from "./ThemeContext";
-import { Modal, Select } from 'antd'; // Import Modal and Select from antd
+import { Modal, Select, Input } from 'antd'; // Import Modal, Select, and Input from antd
 import DarkModeToggle from './DarkModeToggle';
 
 const { Option } = Select; // Destructure Option from Select
@@ -10,8 +10,10 @@ const DashboardPage = ({ onLogout }) => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState('active');
-  const [isModalVisible, setIsModalVisible] = useState(false); // State for modal visibility
-  const [selectedProducts, setSelectedProducts] = useState([]); // State for selected products
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [sellingRate, setSellingRate] = useState('');
+  const [totalItems, setTotalItems] = useState('');
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
@@ -49,16 +51,14 @@ const DashboardPage = ({ onLogout }) => {
       <div className="tabs">
         <button onClick={() => handleTabClick('active')} className={activeTab === 'active' ? 'active' : ''}>Active Orders</button>
         <button onClick={() => handleTabClick('completed')} className={activeTab === 'completed' ? 'active' : ''}>Completed Orders</button>
-        <button onClick={showModal}>+ Sale Order</button> {/* Open modal on button click */}
+        <button onClick={showModal}>+ Sale Order</button>
       </div>
       <div className="orders">
         {activeTab === 'active' && <h3>Active Sale Orders</h3>}
         {activeTab === 'completed' && <h3>Completed Sale Orders</h3>}
-        {/* Content for active and completed sale orders */}
       </div>
 
-      {/* Modal Form */}
-      <Modal title="Add Sale Order" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel} maskClosable={false}>
+      <Modal title="Add Sale Order" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <Select
           mode="multiple"
           placeholder="Select products"
@@ -69,16 +69,30 @@ const DashboardPage = ({ onLogout }) => {
           <Option value="product1">Product 1</Option>
           <Option value="product2">Product 2</Option>
           <Option value="product3">Product 3</Option>
-          {/* Add more options as needed */}
         </Select>
-        <div>
-          {selectedProducts.map(product => (
-            <span key={product} className="selected-product">
-              {product} 
-              <button onClick={() => handleRemoveProduct(product)}>X</button> {/* Button to remove selected product */}
-            </span>
-          ))}
-        </div>
+        {selectedProducts.map(product => (
+          <div key={product} className="selected-product">
+            <div>
+              <span>{product}</span>
+              <span>Price: $10</span> {/* Example price */}
+            </div>
+            <hr />
+            <div>
+              <Input
+                placeholder="Selling Rate"
+                value={sellingRate}
+                onChange={(e) => setSellingRate(e.target.value)}
+              />
+              <Input
+                placeholder="Total Items"
+                value={totalItems}
+                onChange={(e) => setTotalItems(e.target.value)}
+              />
+              <div className="items-left">10 items left</div>
+            </div>
+            <button onClick={() => handleRemoveProduct(product)}>Remove</button>
+          </div>
+        ))}
       </Modal>
       <button onClick={handleLogoutClick}>Logout</button>
     </div>
