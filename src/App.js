@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Redirect,
+  Route,
+  Link,
+} from "react-router-dom";
+import HomePage from './components/HomePage';
+import LoginPage from './components/LoginPage';
+import DashboardPage from './components/DashboardPage';
 
-function App() {
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const setAuth = (auth) => {
+    setIsAuthenticated(auth);
+  };
+
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <HomePage />
+    },
+    {
+      path: "login",
+      element: isAuthenticated? <Link to="/dashboard" />:<LoginPage setAuth={setAuth} />
+    },
+    {
+      path:"dashboard",
+      element:isAuthenticated ? <DashboardPage /> : <Link to="/login" />
+    }
+  ]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <RouterProvider router={router} />
   );
-}
+};
 
 export default App;
