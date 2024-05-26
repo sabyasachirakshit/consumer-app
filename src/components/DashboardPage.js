@@ -24,10 +24,12 @@ const DashboardPage = ({ onLogout }) => {
       <div className="tabs">
         <button onClick={() => handleTabClick('active')} className={activeTab === 'active' ? 'active' : ''}>Active Orders</button>
         <button onClick={() => handleTabClick('completed')} className={activeTab === 'completed' ? 'active' : ''}>Completed Orders</button>
+        <button>+sale order</button>
       </div>
       <div className="orders">
         {activeTab === 'active' && <h3>Active Sale Orders</h3>}
         {activeTab === 'completed' && <h3>Completed Sale Orders</h3>}
+        
         {/* Content for active and completed sale orders */}
       </div>
       <button onClick={handleLogoutClick}>Logout</button>
