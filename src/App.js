@@ -4,7 +4,7 @@ import {
   RouterProvider,
   Redirect,
   Route,
-  Link,
+  Navigate,
 } from "react-router-dom";
 import HomePage from './components/HomePage';
 import LoginPage from './components/LoginPage';
@@ -17,6 +17,10 @@ const App = () => {
     setIsAuthenticated(auth);
   };
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -24,11 +28,11 @@ const App = () => {
     },
     {
       path: "login",
-      element: isAuthenticated? <Link to="/dashboard" />:<LoginPage setAuth={setAuth} />
+      element: isAuthenticated ? <Navigate to="/dashboard" /> : <LoginPage setAuth={setAuth} />
     },
     {
-      path:"dashboard",
-      element:isAuthenticated ? <DashboardPage /> : <Link to="/login" />
+      path: "dashboard",
+      element: isAuthenticated ? <DashboardPage onLogout={handleLogout} /> : <Navigate to="/login" />
     }
   ]);
 
