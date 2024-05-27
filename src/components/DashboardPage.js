@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from "./ThemeContext";
-import { Select, Modal, Form, Input, Button, Table, DatePicker } from 'antd';
+import { Select, Modal, Form, Input, Button, Table } from 'antd';
 import DarkModeToggle from './DarkModeToggle';
 
 const { Option } = Select;
@@ -109,7 +109,7 @@ const DashboardPage = ({ onLogout }) => {
       dataIndex: 'formData',
       key: 'formData',
       render: (text, record) => (
-        <Button type="link" onClick={() => handleEditForm(record, selectedProducts)}>..</Button>
+        <Button type="link" onClick={() => handleEditForm(record, record.formData.products)}>..</Button>
       )
     }
   ];
@@ -141,7 +141,7 @@ const DashboardPage = ({ onLogout }) => {
           <Button key="cancel" onClick={() => setShowFormModal(false)}>
             Cancel
           </Button>,
-          <Button key="submit" type="primary" onClick={handleFormSubmit}>
+          <Button key="submit" type="primary" onClick={handleFormSubmit} disabled={activeTab === 'completed'}>
             Submit
           </Button>,
         ]}
@@ -157,6 +157,7 @@ const DashboardPage = ({ onLogout }) => {
               placeholder="Select products"
               onChange={handleProductSelectChange} // Handle selection change
               value={selectedProducts}
+              disabled={activeTab === 'completed'}
             >
               {/* Replace this with your actual product options */}
               <Option value="product1">Product 1</Option>
@@ -176,10 +177,10 @@ const DashboardPage = ({ onLogout }) => {
                 </div>
                 <Input.Group compact style={{ marginBottom: '5px' }}>
                   <Form.Item label="Selling Rate" name={['sellingRate', index]} noStyle>
-                    <Input style={{ width: '50%' }} placeholder="Selling Rate" />
+                    <Input style={{ width: '50%' }} placeholder="Selling Rate" disabled={activeTab === 'completed'} />
                   </Form.Item>
                   <Form.Item label="Total Items" name={['totalItems', index]} noStyle>
-                    <Input style={{ width: '50%' }} placeholder="Total Items" />
+                    <Input style={{ width: '50%' }} placeholder="Total Items" disabled={activeTab === 'completed'} />
                   </Form.Item>
                 </Input.Group>
                 <div className="remaining-items" style={{ display: "flex", justifyContent: "center", float: "right", width: "30%", backgroundColor: "lightgreen", color: "darkgreen" }}>2 items remaining</div>
