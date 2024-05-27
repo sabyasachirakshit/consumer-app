@@ -6,6 +6,54 @@ import DarkModeToggle from "./DarkModeToggle";
 
 const { Option } = Select;
 
+const fakeProductAPI = () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        id: 209,
+        display_id: 8,
+        owner: 1079,
+        name: "New Product",
+        category: "The god of War",
+        characteristics: "New Product Characteristics",
+        features: "",
+        brand: "New Product Brand",
+        sku: [
+          {
+            id: 248,
+            selling_price: 54,
+            max_retail_price: 44,
+            amount: 33,
+            unit: "kg",
+            quantity_in_inventory: 0,
+            product: 209,
+          },
+          {
+            id: 247,
+            selling_price: 32,
+            max_retail_price: 32,
+            amount: 33,
+            unit: "kg",
+            quantity_in_inventory: 0,
+            product: 209,
+          },
+          {
+            id: 246,
+            selling_price: 23,
+            max_retail_price: 21,
+            amount: 22,
+            unit: "kg",
+            quantity_in_inventory: 1,
+            product: 209,
+          },
+        ],
+        updated_on: "2024-05-24T12:46:41.995873Z",
+        adding_date: "2024-05-24T12:46:41.995828Z",
+      });
+    }, 1000); // Simulate network delay
+  });
+};
+
 const DashboardPage = ({ onLogout }) => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
@@ -36,41 +84,45 @@ const DashboardPage = ({ onLogout }) => {
     form
       .validateFields()
       .then((values) => {
-        // Calculate total price
-        const totalPrice = selectedProducts.reduce((acc, product, index) => {
-          const sellingRate = values.sellingRate[index];
-          const totalItems = values.totalItems[index];
-          return acc + sellingRate * totalItems;
-        }, 0);
+        // Simulate API call
+        fakeProductAPI().then((productData) => {
+          // Calculate total price
+          const totalPrice = selectedProducts.reduce((acc, product, index) => {
+            const sellingRate = values.sellingRate[index];
+            const totalItems = values.totalItems[index];
+            return acc + sellingRate * totalItems;
+          }, 0);
 
-        if (editingFormData) {
-          // Update existing form submission
-          const updatedSubmissions = formSubmissions.map((submission) =>
-            submission.key === editingFormData.key
-              ? {
-                  ...submission,
-                  totalPrice,
-                  lastModified: new Date().toLocaleString(),
-                  formData: values,
-                }
-              : submission
-          );
-          setFormSubmissions(updatedSubmissions);
-        } else {
-          // Add new form submission
-          setFormSubmissions([
-            ...formSubmissions,
-            {
-              key: formSubmissions.length + 1,
-              userName: "User", // Static username for demonstration
-              totalPrice,
-              lastModified: new Date().toLocaleString(),
-              formData: values,
-            },
-          ]);
-        }
+          if (editingFormData) {
+            // Update existing form submission
+            const updatedSubmissions = formSubmissions.map((submission) =>
+              submission.key === editingFormData.key
+                ? {
+                    ...submission,
+                    totalPrice,
+                    lastModified: new Date().toLocaleString(),
+                    formData: values,
+                  }
+                : submission
+            );
+            setFormSubmissions(updatedSubmissions);
+          } else {
+            // Add new form submission
+            setFormSubmissions([
+              ...formSubmissions,
+              {
+                key: formSubmissions.length + 1,
+                userName: "User", // Static username for demonstration
+                totalPrice,
+                lastModified: new Date().toLocaleString(),
+                formData: values,
+                productData, // Adding the product data to the submission
+              },
+            ]);
+          }
 
-        setShowFormModal(false);
+          setShowFormModal(false);
+        });
       })
       .catch((errorInfo) => {
         console.error("Validation failed:", errorInfo);
@@ -225,7 +277,7 @@ const DashboardPage = ({ onLogout }) => {
 
                       {
                         validator: (_, value) =>
-                          Number(value) > 0
+                          value > 0
                             ? Promise.resolve()
                             : Promise.reject("Selling rate must be positive!"),
                       },

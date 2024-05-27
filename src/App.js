@@ -11,7 +11,7 @@ import { ThemeProvider } from './components/ThemeContext';
 import "./styles/dark.css";
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const setAuth = (auth) => {
     setIsAuthenticated(auth);
